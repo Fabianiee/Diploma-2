@@ -5,12 +5,27 @@ import static org.hamcrest.CoreMatchers.equalTo;
 
 public class OrderTests {
 
-        private static final URI BASE_URL = URI.create("https://stellarburgers.nomoreparties.site/api/orders");
+    private static final URI BASE_URL = URI.create("https://stellarburgers.nomoreparties.site/api/orders");
+
+    private String createTestIngredient(String token) {
+        String ingredientId = given()
+                .header("Content-type", "application/json")
+                .header("Authorization", token)
+                .body("{\"name\":\"Test Ingredient\", \"type\":\"bun\", \"price\":100}")
+                .when()
+                .post("https://stellarburgers.nomoreparties.site/api/ingredients")
+                .then()
+                .statusCode(201)
+                .extract().path("id");
+        return ingredientId;
+    }
 
     @Test
     public void createOrderWithAuthorization() {
         String token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjZjNzMyOWVkMjgwMDAxYjRjNDNiZCIsImlhdCI6MTcyNzQ0ODkxMCwiZXhwIjoxNzI3NDUwMTEwfQ.OPvRJ0WmDquAnw013KOjXCCDbIkAnGMCiuWTUVyS7fc";
-        String ingredients = "[\"60d3b41abdacab0026a733c6\",\"609646e4dc916e00276b2870\"]";
+        String ingredientId1 = createTestIngredient(token);
+        String ingredientId2 = createTestIngredient(token);
+        String ingredients = "[\"" + ingredientId1 + "\",\"" + ingredientId2 + "\"]";
 
         given()
                 .header("Content-type", "application/json")
@@ -35,15 +50,19 @@ public class OrderTests {
                 .then()
                 .statusCode(400)
                 .body("success", equalTo(false));
-
     }
+
     @Test
     public void createOrderWithIngredients() {
         String token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjZjNzMyOWVkMjgwMDAxYjRjNDNiZCIsImlhdCI6MTcyNzQ0ODkxMCwiZXhwIjoxNzI3NDUwMTEwfQ.OPvRJ0WmDquAnw013KOjXCCDbIkAnGMCiuWTUVyS7fc";
+        String ingredientId1 = createTestIngredient(token);
+        String ingredientId2 = createTestIngredient(token);
+        String ingredients = "[\"" + ingredientId1 + "\",\"" + ingredientId2 + "\"]";
+
         given()
                 .header("Content-type", "application/json")
                 .header("Authorization", token)
-                .body("\"ingredients\": [\"60d3b41abdacab0026a733c6\",\"609646e4dc916e00276b2870\"]")
+                .body("{\"ingredients\":" + ingredients + "}")
                 .when()
                 .post(BASE_URL)
                 .then()
@@ -63,7 +82,6 @@ public class OrderTests {
                 .then()
                 .statusCode(400)
                 .body("message", equalTo("Ingredient ids must be provided"));
-
     }
 
     @Test

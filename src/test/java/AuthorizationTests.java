@@ -1,5 +1,7 @@
 import org.junit.Test;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -10,9 +12,13 @@ public class AuthorizationTests {
 
     @Test
     public void loginUserSuccessfully() {
+        Map<String, String> data = new HashMap<>();
+        data.put("email", "I.am.Mary@gmail.com");
+        data.put("password", "PaSsWoRd798465132");
+
         given()
                 .contentType("application/json")
-                .body("{\"email\":\"I.am.Mary@gmail.com\",\"password\":\"PaSsWoRd798465132\"}")
+                .body(data)
                 .when()
                 .post(BASE_URL + "/login")
                 .then()
@@ -22,9 +28,13 @@ public class AuthorizationTests {
 
     @Test
     public void loginUserWithInvalidCredentials() {
+        Map<String, String> data = new HashMap<>();
+        data.put("email", "wrong@gmail.com");
+        data.put("password", "wrongpassword");
+
         given()
                 .contentType("application/json")
-                .body("{\"email\":\"wrong@gmail.com\",\"password\":\"wrongpassword\"}")
+                .body(data)
                 .when()
                 .post(BASE_URL + "/login")
                 .then()
